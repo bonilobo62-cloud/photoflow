@@ -7,6 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PhotoFlow">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="./manifest.json">
     <link rel="apple-touch-icon" href="./icon-512.png">
     <title>PhotoFlow Pro</title>
@@ -782,6 +783,14 @@
                     video.controls = true;
                     video.playsInline = true;
                     video.preload = 'metadata';
+                    
+                    // Cuando termine el vídeo, pasar al siguiente automáticamente
+                    video.onended = () => {
+                        if(isPlaying) {
+                            setTimeout(() => nextSlide(), 1000); // Espera 1 segundo y avanza
+                        }
+                    };
+                    
                     slide.appendChild(video);
                 } else {
                     const img = document.createElement('img');
@@ -812,11 +821,12 @@
             if(currentSlide) currentSlide.classList.remove('active');
             
             currentIndex = index;
-            const nextSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
-            if(nextSlide) {
-                nextSlide.classList.add('active');
+            const nextSlideElement = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
+            if(nextSlideElement) {
+                nextSlideElement.classList.add('active');
+                
                 // Reproducir vídeo si es el elemento actual
-                const video = nextSlide.querySelector('video');
+                const video = nextSlideElement.querySelector('video');
                 if(video && isPlaying) {
                     video.currentTime = 0;
                     video.play().catch(e => console.log('Video autoplay:', e));
