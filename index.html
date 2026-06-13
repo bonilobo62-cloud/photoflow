@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoFlow - Visor de Fotos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Pantalla de inicio */
+        #uploadScreen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: opacity 0.5s ease;
+        }
+
+        .upload-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .upload-box h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .upload-box p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .drop-zone {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .drop-zone.dragover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #764ba2;
+        }
+
+        /* Visor de fotos */
+        #viewer {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: #000;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        /* Controles */
+        #controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 30px 20px 20px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #viewer:hover #controls,
+        #controls.visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .controls-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .control-btn.active {
+            background: #667eea;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 25px;
+        }
+
+        .speed-control label {
+            font-size: 0.9em;
+        }
+
+        .speed-control input[type="range"] {
+            width: 100px;
+        }
+
+        .info {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+        }
+
+        /* Reproductor de música */
+        #musicControl {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px 20px;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        #musicControl.visible {
+            display: flex;
+        }
+
+        .music-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        /* Contador */
+        .counter {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .counter.visible {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .upload-box {
+                padding: 30px 20px;
+            }
+            
+            .upload-box h1 {
+                font-size: 1.8em;
+            }
+            
+            .controls-wrapper {
+                gap: 10px;
+            }
+            
+            .control-btn {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Animación de carga */
+        .loader {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla de subida -->
+    <div id="uploadScreen">
+        <div class="upload-box">
+            <h1>📸 PhotoFlow</h1>
+            <p>Sube tus fotos y disfruta de una presentación elegante</p>
+            
+            <div class="drop-zone" id="dropZone">
+                <p>📁 Arrastra tus fotos aquí</p>
+                <p style="margin: 10px 0;">o</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Seleccionar Archivos
+                </button>
+                <input type="file" id="fileInput" multiple accept="image/*">
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button class="upload-btn" onclick="document.getElementById('musicInput').click()">
+                    🎵 Agregar Música (Opcional)
+                </button>
+                <input type="file" id="musicInput" accept="audio/*">
+            </div>
+            
+            <div id="fileCount" style="margin-top: 20px; color: #666;"></div>
+        </div>
+    </div>
+
+    <!-- Visor -->
+    <div id="viewer">
+        <div id="slidesContainer"></div>
+        
+        <div class="counter" id="counter">1 / 1</div>
+        
+        <div id="musicControl">
+            <span id="musicName">🎵 Sin música</span>
+            <button class="music-btn" onclick="toggleMusic()" id="musicBtn">▶</button>
+        </div>
+        
+        <div id="controls">
+            <div class="controls-wrapper">
+                <button class="control-btn" onclick="previousSlide()" title="Anterior">⏮</button>
+                <button class="control-btn" onclick="togglePlay()" id="playBtn" title="Play/Pause">⏸</button>
+                <button class="control-btn" onclick="nextSlide()" title="Siguiente">⏭</button>
+                
+                <div class="progress-bar" onclick="seekTo(event)">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                
+                <div class="speed-control">
+                    <label>🐢</label>
+                    <input type="range" id="speedRange" min="1" max="10" value="5">
+                    <label>🐇</label>
+                    <span id="speedValue">5s</span>
+                </div>
+                
+                <button class="control-btn" onclick="toggleFullscreen()" title="Pantalla completa">⛶</button>
+                <button class="control-btn" onclick="shuffleSlides()" title="Aleatorio">🔀</button>
+                <button class="control-btn" onclick="resetApp()" title="Nueva presentación">🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" loop></audio>
+
+    <script>
+        let images = [];
+        let currentIndex = 0;
+        let isPlaying = true;
+        let slideInterval;
+        let slideDuration = 5000;
+        let isShuffled = false;
+        let originalImages = [];
+
+        // Elementos DOM
+        const uploadScreen = document.getElementById('uploadScreen');
+        const viewer = document.getElementById('viewer');
+        const fileInput = document.getElementById('fileInput');
+        const musicInput = document.getElementById('musicInput');
+        const dropZone = document.getElementById('dropZone');
+        const slidesContainer = document.getElementById('slidesContainer');
+        const playBtn = document.getElementById('playBtn');
+        const speedRange = document.getElementById('speedRange');
+        const speedValue = document.getElementById('speedValue');
+        const counter = document.getElementById('counter');
+        const musicControl = document.getElementById('musicControl');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const progressFill = document.getElementById('progressFill');
+
+        // Event Listeners
+        fileInput.addEventListener('change', handleFiles);
+        musicInput.addEventListener('change', handleMusic);
+        
+        speedRange.addEventListener('input', (e) => {
+            slideDuration = (11 - e.target.value) * 1000;
+            speedValue.textContent = e.target.value + 's';
+            if (isPlaying) {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, slideDuration);
+            }
+        });
+
+        // Drag and Drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+            loadImages(files);
+        });
+
+        function handleFiles(e) {
+            const files = Array.from(e.target.files);
+            loadImages(files);
+        }
+
+        function handleMusic(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                audioPlayer.src = url;
+                document.getElementById('musicName').textContent = '🎵 ' + file.name.substring(0, 20);
+                musicControl.classList.add('visible');
+                audioPlayer.play();
+            }
+        }
+
+        function loadImages(files) {
+            images = files;
+            originalImages = [...files];
+            
+            if (images.length === 0) {
+                alert('No se encontraron imágenes');
+                return;
+            }
+
+            document.getElementById('fileCount').textContent = `${images.length} fotos cargadas`;
+            
+            setTimeout(() => {
+                startViewer();
+            }, 1000);
+        }
+
+        function startViewer() {
+            uploadScreen.style.opacity = '0';
+            setTimeout(() => {
+                uploadScreen.style.display = 'none';
+                viewer.style.display = 'block';
+                counter.classList.add('visible');
+                createSlides();
+                showSlide(0);
+                startSlideshow();
+            }, 500);
+        }
+
+        function createSlides() {
+            slidesContainer.innerHTML = '';
+            images.forEach((image, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.dataset.index = index;
+                
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(image);
+                img.alt = image.name;
+                
+                slide.appendChild(img);
+                slidesContainer.appendChild(slide);
+            });
+        }
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            
+            currentIndex = index;
+            counter.textContent = `${index + 1} / ${images.length}`;
+            updateProgress();
+        }
+
+        function nextSlide() {
+            let nextIndex = currentIndex + 1;
+            if (nextIndex >= images.length) {
+                nextIndex = 0;
+            }
+            showSlide(nextIndex);
+        }
+
+        function previousSlide() {
+            let prevIndex = currentIndex - 1;
+            if (prevIndex < 0) {
+                prevIndex = images.length - 1;
+            }
+            showSlide(prevIndex);
+        }
+
+        function startSlideshow() {
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            slideInterval = setInterval(nextSlide, slideDuration);
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(slideInterval);
+                playBtn.textContent = '▶';
+                isPlaying = false;
+            } else {
+                startSlideshow();
+            }
+        }
+
+        function toggleMusic() {
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                document.getElementById('musicBtn').textContent = '⏸';
+            } else {
+                audioPlayer.pause();
+                document.getElementById('musicBtn').textContent = '▶';
+            }
+        }
+
+        function shuffleSlides() {
+            isShuffled = !isShuffled;
+            if (isShuffled) {
+                for (let i = images.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [images[i], images[j]] = [images[j], images[i]];
+                }
+            } else {
+                images = [...originalImages];
+            }
+            createSlides();
+            showSlide(0);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function seekTo(event) {
+            const bar = event.currentTarget;
+            const clickPosition = event.offsetX / bar.offsetWidth;
+            const newIndex = Math.floor(clickPosition * images.length);
+            showSlide(newIndex);
+        }
+
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / images.length) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        function resetApp() {
+            clearInterval(slideInterval);
+            location.reload();
+        }
+
+        // Controles de teclado
+        document.addEventListener('keydown', (e) => {
+            if (viewer.style.display === 'none') return;
+            
+            switch(e.key) {
+                case ' ':
+                case 'ArrowRight':
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                    previousSlide();
+                    break;
+                case ' ':
+                    togglePlay();
+                    break;
+                case 'f':
+                    toggleFullscreen();
+                    break;
+                case 'm':
+                    toggleMusic();
+                    break;
+                case 'Escape':
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    }
+                    break;
+            }
+        });
+
+        // Auto-hide controls
+        let controlsTimeout;
+        viewer.addEventListener('mousemove', () => {
+            document.getElementById('controls').classList.add('visible');
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(() => {
+                if (isPlaying) {
+                    document.getElementById('controls').classList.remove('visible');
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
