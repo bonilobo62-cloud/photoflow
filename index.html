@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PhotoFlow">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icon-512.png">
+    <title>PhotoFlow Pro</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+            --bg-dark: #1a1a2e;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #666666;
+            --border-radius: 20px;
+        }
+
+        [data-theme="dark"] {
+            --bg-dark: #0f0f1e;
+            --bg-card: rgba(30, 30, 50, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f0f2f5;
+            --bg-card: rgba(255, 255, 255, 0.98);
+            --text-primary: #1a1a2e;
+            --text-secondary: #666666;
+        }
+
+        [data-theme="purple"] {
+            --primary: #a855f7;
+            --secondary: #ec4899;
+            --bg-dark: #2e1065;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #d8b4fe;
+        }
+
+        [data-theme="blue"] {
+            --primary: #0ea5e9;
+            --secondary: #06b6d4;
+            --bg-dark: #0c4a6e;
+            --bg-card: rgba(255, 255, 255, 0.95);
+            --text-primary: #ffffff;
+            --text-secondary: #7dd3fc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #16213e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            color: var(--text-primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover, .control-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .search-container {
+            padding: 0 20px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--primary);
+            border-radius: 25px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-box::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        input[type="file"] { display: none; }
+
+        .section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section-title {
+            color: var(--primary);
+            margin: 20px 0 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .albums-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .album-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .album-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .album-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .album-name {
+            color: var(--text-primary);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .album-count {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        #viewer {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 1000;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slide.active { opacity: 1; }
+
+        .slide img, .slide video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #viewer-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 30px 20px 20px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #viewer:hover #viewer-controls { opacity: 1; }
+
+        .viewer-controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .viewer-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .viewer-btn:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 400px;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.2s;
+        }
+
+        .info-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .modal-content h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.5rem; }
+            .albums-grid { grid-template-columns: repeat(2, 1fr); }
+            .viewer-btn { width: 40px; height: 40px; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="header">
+        <h1>📸 PhotoFlow Pro</h1>
+        <p style="color: var(--text-secondary);">Tu galería personal con álbumes</p>
+    </div>
+
+    <div class="top-controls">
+        <button class="control-btn active" onclick="setTheme('dark')">🌙 Oscuro</button>
+        <button class="control-btn" onclick="setTheme('light')">☀️ Claro</button>
+        <button class="control-btn" onclick="setTheme('purple')">💜 Purple</button>
+        <button class="control-btn" onclick="setTheme('blue')">💙 Blue</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar fotos o álbumes..." oninput="searchItems()">
+    </div>
+
+    <div class="section" id="mainContent">
+        
+        <div class="card">
+            <h2 style="margin-bottom: 15px; color: var(--primary);">🎨 Crear Álbum</h2>
+            <button class="btn" onclick="showCreateAlbumModal()">+ Nuevo Álbum</button>
+            <button class="btn btn-outline" onclick="document.getElementById('folderInput').click()">📁 Cargar Carpeta</button>
+            <input type="file" id="folderInput" webkitdirectory directory multiple>
+            <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">🖼️ Seleccionar Fotos/Vídeos</button>
+            <input type="file" id="fileInput" multiple accept="image/*,video/*">
+            <div id="loader" class="loader"></div>
+        </div>
+
+        <div>
+            <h2 class="section-title">📚 Mis Álbums</h2>
+            <div class="albums-grid" id="albumsGrid">
+            </div>
+        </div>
+    </div>
+
+    <div id="viewer">
+        <div class="info-overlay" id="viewerInfo">Álbum</div>
+        <div id="slidesContainer"></div>
+        
+        <div id="viewer-controls">
+            <div class="viewer-controls-row">
+                <button class="viewer-btn" onclick="prevSlide()">⏮</button>
+                <button class="viewer-btn" id="playPauseBtn" onclick="togglePlay()">⏸</button>
+                <button class="viewer-btn" onclick="nextSlide()">⏭</button>
+                <button class="viewer-btn" onclick="toggleMusic()">🎵</button>
+                <button class="viewer-btn" onclick="goHome()">🏠</button>
+            </div>
+            <div class="progress-bar" onclick="seek(event)" ontouchstart="seek(event)">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <audio id="audioPlayer" loop></audio>
+    </div>
+
+    <div class="modal" id="createAlbumModal">
+        <div class="modal-content">
+            <h2>Crear Nuevo Álbum</h2>
+            <input type="text" class="modal-input" id="albumNameInput" placeholder="Nombre del álbum">
+            <button class="btn" onclick="createAlbum()">Crear Álbum</button>
+            <button class="btn btn-outline" onclick="closeCreateAlbumModal()">Cancelar</button>
+        </div>
+    </div>
+
+    <script>
+        let images = [];
+        let currentIndex = 0;
+        let isPlaying = false;
+        let slideTimer = null;
+        let slideDuration = 4000;
+        let db = null;
+        let albums = [];
+        let currentAlbum = null;
+
+        window.onload = async function() {
+            await initDB();
+            loadTheme();
+            await loadAlbums();
+            registerServiceWorker();
+            
+            document.getElementById('folderInput').addEventListener('change', (e) => handleFiles(e, 'folder'));
+            document.getElementById('fileInput').addEventListener('change', (e) => handleFiles(e, 'files'));
+        };
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log('Service Worker registrado'))
+                    .catch(err => console.log('SW error:', err));
+            }
+        }
+
+        function initDB() {
+            return new Promise((resolve) => {
+                const request = indexedDB.open("PhotoFlowProDB", 2);
+                
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains("albums")) {
+                        database.createObjectStore("albums", { keyPath: "id", autoIncrement: true });
+                    }
+                };
+                
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve();
+                };
+                
+                request.onerror = () => resolve();
+            });
+        }
+
+        async function loadAlbums() {
+            if(!db) return;
+            const tx = db.transaction("albums", "readonly");
+            const store = tx.objectStore("albums");
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                albums = request.result;
+                renderAlbums();
+            };
+        }
+
+        function renderAlbums() {
+            const grid = document.getElementById('albumsGrid');
+            grid.innerHTML = '';
+            
+            if(albums.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 20px;">No hay álbums creados</div>';
+                return;
+            }
+            
+            albums.forEach(album => {
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.innerHTML = `
+                    <div class="album-icon">📁</div>
+                    <div class="album-name">${album.name}</div>
+                    <div class="album-count">${album.items ? album.items.length : 0} archivos</div>
+                `;
+                card.onclick = () => openAlbum(album.id);
+                grid.appendChild(card);
+            });
+        }
+
+        function showCreateAlbumModal() {
+            document.getElementById('createAlbumModal').classList.add('active');
+            document.getElementById('albumNameInput').focus();
+        }
+
+        function closeCreateAlbumModal() {
+            document.getElementById('createAlbumModal').classList.remove('active');
+            document.getElementById('albumNameInput').value = '';
+        }
+
+        async function createAlbum() {
+            const name = document.getElementById('albumNameInput').value.trim();
+            if(!name) {
+                alert('Por favor, escribe un nombre para el álbum');
+                return;
+            }
+            
+            if(!db) return;
+            
+            const tx = db.transaction("albums", "readwrite");
+            const store = tx.objectStore("albums");
+            
+            store.add({
+                name: name,
+                date: new Date().toLocaleDateString(),
+                items: []
+            });
+            
+            closeCreateAlbumModal();
+            await loadAlbums();
+        }
+
+        async function openAlbum(albumId) {
+            const album = albums.find(a => a.id === albumId);
+            if(!album || !album.items) return;
+            
+            currentAlbum = album;
+            startSlideshow(album.items, album.name);
+        }
+
+        async function addToAlbum(albumId, files) {
+            if(!db) return;
+            const album = albums.find(a => a.id === albumId);
+            if(!album) return;
+            
+            if(!album.items) album.items = [];
+            
+            const newItems = await Promise.all(files.map(async file => ({
+                name: file.name,
+                type: file.type,
+                blob: await file.arrayBuffer()
+            })));
+            
+            album.items.push(...newItems);
+            
+            const tx = db.transaction("albums", "readwrite");
+            const store = tx.objectStore("albums");
+            store.put(album);
+            
+            await loadAlbums();
+        }
+
+        function setTheme(themeName) {
+            document.body.setAttribute('data-theme', themeName);
+            localStorage.setItem('photoflow-theme', themeName);
+            
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.textContent.toLowerCase().includes(themeName)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem('photoflow-theme') || 'dark';
+            setTheme(saved);
+        }
+
+        function searchItems() {
+            const query = document.getElementById('searchBox').value.toLowerCase();
+            if(!query) {
+                loadAlbums();
+                return;
+            }
+            
+            const filtered = albums.filter(album => 
+                album.name.toLowerCase().includes(query)
+            );
+            
+            const grid = document.getElementById('albumsGrid');
+            grid.innerHTML = '';
+            
+            if(filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">No se encontraron álbums</div>';
+                return;
+            }
+            
+            filtered.forEach(album => {
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.innerHTML = `
+                    <div class="album-icon">📁</div>
+                    <div class="album-name">${album.name}</div>
+                    <div class="album-count">${album.items ? album.items.length : 0} archivos</div>
+                `;
+                card.onclick = () => openAlbum(album.id);
+                grid.appendChild(card);
+            });
+        }
+
+        async function handleFiles(e, type) {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+            if(files.length === 0) return;
+            
+            document.getElementById('loader').style.display = 'block';
+            
+            let folderName = type === 'folder' ? 
+                files[0].webkitRelativePath.split('/')[0] : 
+                'Fotos Seleccionadas';
+            
+            if(albums.length > 0) {
+                const addToExisting = confirm(`¿Quieres añadir estas ${files.length} fotos a un álbum existente?\n\nCancelar para crear slideshow temporal`);
+                if(addToExisting) {
+                    const albumName = prompt('Escribe el nombre del álbum (o deja vacío para ver la lista):');
+                    if(albumName) {
+                        const album = albums.find(a => a.name.toLowerCase() === albumName.toLowerCase());
+                        if(album) {
+                            await addToAlbum(album.id, files);
+                            alert(`Fotos añadidas al álbum "${album.name}"`);
+                            document.getElementById('loader').style.display = 'none';
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            startSlideshow(files, folderName);
+            document.getElementById('loader').style.display = 'none';
+            e.target.value = '';
+        }
+
+        function startSlideshow(fileList, title) {
+            images = fileList;
+            currentIndex = 0;
+            
+            const container = document.getElementById('slidesContainer');
+            container.innerHTML = '';
+            
+            images.forEach((file, index) => {
+                const slide = document.createElement('div');
+                slide.className = index === 0 ? 'slide active' : 'slide';
+                
+                if(file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.controls = true;
+                    video.playsInline = true;
+                    video.preload = 'auto';
+                    slide.dataset.hasVideo = 'true';
+                    
+                    video.addEventListener('ended', () => {
+                        setTimeout(() => {
+                            if(isPlaying) nextSlide();
+                        }, 2000);
+                    });
+                    
+                    video.addEventListener('play', () => {
+                        pause();
+                    });
+                    
+                    video.addEventListener('pause', () => {
+                        if(!isPlaying) play();
+                    });
+                    
+                    slide.appendChild(video);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    slide.dataset.hasVideo = 'false';
+                    slide.appendChild(img);
+                }
+                
+                container.appendChild(slide);
+            });
+            
+            document.getElementById('viewerInfo').textContent = `${title} | ${images.length} archivos`;
+            document.getElementById('mainContent').style.display = 'none';
+            document.querySelector('.header').style.display = 'none';
+            document.querySelector('.top-controls').style.display = 'none';
+            document.querySelector('.search-container').style.display = 'none';
+            document.getElementById('viewer').style.display = 'block';
+            
+            play();
+        }
+
+        function showSlide(index) {
+            document.querySelectorAll('video').forEach(video => {
+                video.pause();
+            });
+            
+            const currentSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
+            if(currentSlide) currentSlide.classList.remove('active');
+            
+            currentIndex = index;
+            const nextSlideElement = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
+            if(nextSlideElement) {
+                nextSlideElement.classList.add('active');
+                
+                const video = nextSlideElement.querySelector('video');
+                if(video) {
+                    video.currentTime = 0;
+                }
+            }
+            
+            updateProgress();
+        }
+
+        function nextSlide() {
+            let next = currentIndex + 1;
+            if(next >= images.length) next = 0;
+            showSlide(next);
+        }
+
+        function prevSlide() {
+            let prev = currentIndex - 1;
+            if(prev < 0) prev = images.length - 1;
+            showSlide(prev);
+        }
+
+        function play() {
+            isPlaying = true;
+            document.getElementById('playPauseBtn').textContent = '⏸';
+            clearInterval(slideTimer);
+            
+            slideTimer = setInterval(() => {
+                const currentSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
+                const hasVideo = currentSlide && currentSlide.dataset.hasVideo === 'true';
+                
+                if(!hasVideo) {
+                    nextSlide();
+                }
+            }, slideDuration);
+        }
+
+        function pause() {
+            isPlaying = false;
+            document.getElementById('playPauseBtn').textContent = '▶';
+            clearInterval(slideTimer);
+        }
+
+        function togglePlay() {
+            if(isPlaying) pause(); else play();
+        }
+
+        function toggleMusic() {
+            const audio = document.getElementById('audioPlayer');
+            if(audio.src) {
+                if(audio.paused) { audio.play(); }
+                else { audio.pause(); }
+            }
+        }
+
+        function goHome() {
+            pause();
+            document.getElementById('viewer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.querySelector('.header').style.display = 'block';
+            document.querySelector('.top-controls').style.display = 'flex';
+            document.querySelector('.search-container').style.display = 'block';
+            loadAlbums();
+        }
+
+        function updateProgress() {
+            const percent = ((currentIndex + 1) / images.length) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function seek(e) {
+            e.preventDefault();
+            
+            const bar = e.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            
+            let clientX = e.clientX;
+            if(e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+            }
+            
+            const clickPosition = (clientX - rect.left) / rect.width;
+            const targetIndex = Math.floor(clickPosition * images.length);
+            showSlide(targetIndex);
+        }
+
+        let touchStartX = 0;
+        document.getElementById('viewer').addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        document.getElementById('viewer').addEventListener('touchend', e => {
+            const touchEndX = e.changedTouches[0].screenX;
+            if(touchStartX - touchEndX > 50) nextSlide();
+            if(touchEndX - touchStartX > 50) prevSlide();
+        });
+
+        document.getElementById('createAlbumModal').addEventListener('click', (e) => {
+            if(e.target.id === 'createAlbumModal') closeCreateAlbumModal();
+        });
+    </script>
+</body>
+</html>
