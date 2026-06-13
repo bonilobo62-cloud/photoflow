@@ -766,68 +766,89 @@
             };
         }
 
-        function startSlideshow(fileList, title) {
-            images = fileList;
-            currentIndex = 0;
+     function startSlideshow(fileList, title) {
+    images = fileList;
+    currentIndex = 0;
+    
+    const container = document.getElementById('slidesContainer');
+    container.innerHTML = '';
+    
+    images.forEach((file, index) => {
+        const slide = document.createElement('div');
+        slide.className = index === 0 ? 'slide active' : 'slide';
+        
+        if(file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.controls = true;
+            video.playsInline = true;
+            video.preload = 'auto';
+            slide.dataset.hasVideo = 'true';
             
-            const container = document.getElementById('slidesContainer');
-            container.innerHTML = '';
-            
-            images.forEach((file, index) => {
-                const slide = document.createElement('div');
-                slide.className = index === 0 ? 'slide active' : 'slide';
-                
-                if(file.type.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.src = URL.createObjectURL(file);
-                    video.controls = true;
-                    video.playsInline = true;
-                    video.preload = 'auto';
-                    slide.dataset.hasVideo = 'true';
-                    slide.appendChild(video);
-                } else {
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(file);
-                    slide.dataset.hasVideo = 'false';
-                    slide.appendChild(img);
-                }
-                
-                container.appendChild(slide);
+            // Cuando el vídeo termine, avanzar automáticamente después de 2 segundos
+            video.addEventListener('ended', () => {
+                setTimeout(() => {
+                    if(isPlaying) nextSlide();
+                }, 2000);
             });
             
-            document.getElementById('viewerInfo').textContent = `${title} | ${images.length} archivos`;
-            document.getElementById('mainContent').style.display = 'none';
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.top-controls').style.display = 'none';
-            document.querySelector('.search-container').style.display = 'none';
-            document.getElementById('viewer').style.display = 'block';
-            
-            play();
-        }
-
-        function showSlide(index) {
-            document.querySelectorAll('video').forEach(video => {
-                video.pause();
+            // Cuando el vídeo empiece a reproducirse, pausar el slideshow
+            video.addEventListener('play', () => {
+                pause(); // Pausar el intervalo del slideshow
             });
             
-            const currentSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
-            if(currentSlide) currentSlide.classList.remove('active');
+            // Cuando el vídeo se pause, reanudar el slideshow
+            video.addEventListener('pause', () => {
+                if(!isPlaying) play(); // Reanudar el intervalo
+            });
             
-            currentIndex = index;
-            const nextSlideElement = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
-            if(nextSlideElement) {
-                nextSlideElement.classList.add('active');
-                
-                const video = nextSlideElement.querySelector('video');
-                if(video) {
-                    video.currentTime = 0;
-                    video.play().catch(e => console.log('Video:', e));
-                }
-            }
-            
-            updateProgress();
+            slide.appendChild(video);
+        } else {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            slide.dataset.hasVideo = 'false';
+            slide.appendChild(img);
         }
+        
+        container.appendChild(slide);
+    });
+    
+    document.getElementById('viewerInfo').textContent = `${title} | ${images.length} archivos`;
+    document.getElementById('mainContent').style.display = 'none';
+    document.querySelector('.header').style.display = 'none';
+    document.querySelector('.top-controls').style.display = 'none';
+    document.querySelector('.search-container').style.display = 'none';
+    document.getElementById('viewer').style.display = 'block';
+    
+    play();
+}
 
+      function showSlide(index) {
+    // Pausar y limpiar todos los vídeos
+    document.querySelectorAll('video').forEach(video => {
+        video.pause();
+        video.removeEventListener('ended', null);
+        video.removeEventListener('play', null);
+        video.removeEventListener('pause', null);
+    });
+    
+    const currentSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
+    if(currentSlide) currentSlide.classList.remove('active');
+    
+    currentIndex = index;
+    const nextSlideElement = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
+    if(nextSlideElement) {
+        nextSlideElement.classList.add('active');
+        
+        const video = nextSlideElement.querySelector('video');
+        if(video) {
+            video.currentTime = 0;
+            // No reproducir automáticamente, dejar que el usuario controle
+        }
+    }
+    
+    updateProgress();
+}
         function nextSlide() {
             let next = currentIndex + 1;
             if(next >= images.length) next = 0;
