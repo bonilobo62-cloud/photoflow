@@ -1,11 +1,12 @@
-const CACHE_NAME = 'photoflow-v1';
+const CACHE_NAME = 'photoflow-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// Instalar Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -13,10 +14,10 @@ self.addEventListener('install', event => {
         console.log('Cache abierto');
         return cache.addAll(urlsToCache);
       })
+      .catch(err => console.log('Error cache:', err))
   );
 });
 
-// Activar y limpiar caches antiguos
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -31,7 +32,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Interceptar peticiones
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
