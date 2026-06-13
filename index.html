@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="PhotoFlow">
     <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-512.png">
     <title>PhotoFlow Pro</title>
     <style>
         :root {
@@ -779,7 +779,9 @@
                 if(file.type.startsWith('video/')) {
                     const video = document.createElement('video');
                     video.src = URL.createObjectURL(file);
-                    video.controls = false;
+                    video.controls = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
                     slide.appendChild(video);
                 } else {
                     const img = document.createElement('img');
@@ -801,12 +803,25 @@
         }
 
         function showSlide(index) {
+            // Pausar todos los vídeos
+            document.querySelectorAll('video').forEach(video => {
+                video.pause();
+            });
+            
             const currentSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
             if(currentSlide) currentSlide.classList.remove('active');
             
             currentIndex = index;
             const nextSlide = document.querySelector(`#slidesContainer .slide:nth-child(${currentIndex + 1})`);
-            if(nextSlide) nextSlide.classList.add('active');
+            if(nextSlide) {
+                nextSlide.classList.add('active');
+                // Reproducir vídeo si es el elemento actual
+                const video = nextSlide.querySelector('video');
+                if(video && isPlaying) {
+                    video.currentTime = 0;
+                    video.play().catch(e => console.log('Video autoplay:', e));
+                }
+            }
             
             updateProgress();
         }
