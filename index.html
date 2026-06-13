@@ -36,7 +36,7 @@
             padding: 60px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
         }
 
@@ -61,6 +61,7 @@
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
             margin: 10px;
+            display: inline-block;
         }
 
         .upload-btn:hover {
@@ -68,7 +69,11 @@
             box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
         }
 
-        #fileInput {
+        .upload-btn.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        #fileInput, #folderInput {
             display: none;
         }
 
@@ -83,6 +88,42 @@
         .drop-zone.dragover {
             background: rgba(102, 126, 234, 0.1);
             border-color: #764ba2;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .option-card {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-card:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .option-card .icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .option-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .option-card p {
+            color: #666;
+            font-size: 0.9em;
         }
 
         /* Visor de fotos */
@@ -249,6 +290,23 @@
             display: block;
         }
 
+        /* Nombre de carpeta */
+        .folder-name {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .folder-name.visible {
+            display: block;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .upload-box {
@@ -257,6 +315,10 @@
             
             .upload-box h1 {
                 font-size: 1.8em;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
             }
             
             .controls-wrapper {
@@ -292,19 +354,27 @@
     <div id="uploadScreen">
         <div class="upload-box">
             <h1>📸 PhotoFlow</h1>
-            <p>Sube tus fotos y disfruta de una presentación elegante</p>
+            <p>Carga fotos individuales o carpetas completas</p>
             
-            <div class="drop-zone" id="dropZone">
-                <p>📁 Arrastra tus fotos aquí</p>
-                <p style="margin: 10px 0;">o</p>
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                    Seleccionar Archivos
-                </button>
-                <input type="file" id="fileInput" multiple accept="image/*">
+            <div class="options-grid">
+                <div class="option-card" onclick="document.getElementById('folderInput').click()">
+                    <div class="icon">📁</div>
+                    <h3>Cargar Carpeta</h3>
+                    <p>Selecciona una carpeta completa con fotos</p>
+                </div>
+                
+                <div class="option-card" onclick="document.getElementById('fileInput').click()">
+                    <div class="icon">🖼️</div>
+                    <h3>Cargar Fotos</h3>
+                    <p>Selecciona fotos individuales</p>
+                </div>
             </div>
             
+            <input type="file" id="fileInput" multiple accept="image/*">
+            <input type="file" id="folderInput" webkitdirectory directory multiple>
+            
             <div style="margin-top: 20px;">
-                <button class="upload-btn" onclick="document.getElementById('musicInput').click()">
+                <button class="upload-btn secondary" onclick="document.getElementById('musicInput').click()">
                     🎵 Agregar Música (Opcional)
                 </button>
                 <input type="file" id="musicInput" accept="audio/*">
@@ -319,6 +389,7 @@
         <div id="slidesContainer"></div>
         
         <div class="counter" id="counter">1 / 1</div>
+        <div class="folder-name" id="folderName"></div>
         
         <div id="musicControl">
             <span id="musicName">🎵 Sin música</span>
@@ -327,7 +398,7 @@
         
         <div id="controls">
             <div class="controls-wrapper">
-                <button class="control-btn" onclick="previousSlide()" title="Anterior">⏮</button>
+                <button class="control-btn" onclick="previousSlide()" title="Anterior"></button>
                 <button class="control-btn" onclick="togglePlay()" id="playBtn" title="Play/Pause">⏸</button>
                 <button class="control-btn" onclick="nextSlide()" title="Siguiente">⏭</button>
                 
@@ -359,24 +430,27 @@
         let slideDuration = 5000;
         let isShuffled = false;
         let originalImages = [];
+        let currentFolderName = '';
 
         // Elementos DOM
         const uploadScreen = document.getElementById('uploadScreen');
         const viewer = document.getElementById('viewer');
         const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
         const musicInput = document.getElementById('musicInput');
-        const dropZone = document.getElementById('dropZone');
         const slidesContainer = document.getElementById('slidesContainer');
         const playBtn = document.getElementById('playBtn');
         const speedRange = document.getElementById('speedRange');
         const speedValue = document.getElementById('speedValue');
         const counter = document.getElementById('counter');
+        const folderName = document.getElementById('folderName');
         const musicControl = document.getElementById('musicControl');
         const audioPlayer = document.getElementById('audioPlayer');
         const progressFill = document.getElementById('progressFill');
 
         // Event Listeners
         fileInput.addEventListener('change', handleFiles);
+        folderInput.addEventListener('change', handleFolder);
         musicInput.addEventListener('change', handleMusic);
         
         speedRange.addEventListener('input', (e) => {
@@ -388,25 +462,23 @@
             }
         });
 
-        // Drag and Drop
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
-            const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
-            loadImages(files);
-        });
-
         function handleFiles(e) {
-            const files = Array.from(e.target.files);
+            const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+            currentFolderName = 'Fotos seleccionadas';
+            loadImages(files);
+        }
+
+        function handleFolder(e) {
+            const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+            
+            // Obtener nombre de la carpeta
+            if (files.length > 0) {
+                const path = files[0].webkitRelativePath;
+                currentFolderName = path.split('/')[0];
+            } else {
+                currentFolderName = 'Carpeta seleccionada';
+            }
+            
             loadImages(files);
         }
 
@@ -430,7 +502,7 @@
                 return;
             }
 
-            document.getElementById('fileCount').textContent = `${images.length} fotos cargadas`;
+            document.getElementById('fileCount').textContent = `${images.length} fotos cargadas de "${currentFolderName}"`;
             
             setTimeout(() => {
                 startViewer();
@@ -443,6 +515,8 @@
                 uploadScreen.style.display = 'none';
                 viewer.style.display = 'block';
                 counter.classList.add('visible');
+                folderName.classList.add('visible');
+                folderName.textContent = '📁 ' + currentFolderName;
                 createSlides();
                 showSlide(0);
                 startSlideshow();
@@ -565,7 +639,6 @@
             if (viewer.style.display === 'none') return;
             
             switch(e.key) {
-                case ' ':
                 case 'ArrowRight':
                     nextSlide();
                     break;
