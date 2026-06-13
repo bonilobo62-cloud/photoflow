@@ -471,7 +471,7 @@
                 
                 <button class="control-btn" onclick="toggleFullscreen()" title="Pantalla completa">⛶</button>
                 <button class="control-btn" onclick="shuffleSlides()" title="Aleatorio">🔀</button>
-                <button class="control-btn" onclick="backToHome()" title="Volver al inicio"></button>
+                <button class="control-btn" onclick="backToHome()" title="Volver al inicio">🏠</button>
             </div>
         </div>
     </div>
@@ -529,20 +529,25 @@
 
         // Guardar carpeta en historial
         async function saveFolderToHistory(folderName, imagesData) {
-            const transaction = db.transaction(['folders'], 'readwrite');
-            const store = transaction.objectStore('folders');
-            
-            const folderData = {
-                name: folderName,
-                date: new Date().toISOString(),
-                images: imagesData
-            };
-            
-            store.add(folderData);
+            try {
+                const transaction = db.transaction(['folders'], 'readwrite');
+                const store = transaction.objectStore('folders');
+                
+                const folderData = {
+                    name: folderName,
+                    date: new Date().toISOString(),
+                    images: imagesData
+                };
+                
+                store.add(folderData);
+                console.log('✓ Carpeta guardada:', folderName);
+            } catch (error) {
+                console.error('Error guardando en historial:', error);
+            }
         }
 
         // Obtener historial
-        async function getHistory() {
+        function getHistory() {
             return new Promise((resolve, reject) => {
                 const transaction = db.transaction(['folders'], 'readonly');
                 const store = transaction.objectStore('folders');
@@ -554,7 +559,7 @@
         }
 
         // Eliminar del historial
-        async function deleteFromHistory(id) {
+        function deleteFromHistory(id) {
             const transaction = db.transaction(['folders'], 'readwrite');
             const store = transaction.objectStore('folders');
             store.delete(id);
@@ -591,14 +596,23 @@
         }
 
         // Cargar desde historial
-        function loadFromHistory(folder) {
-            currentFolderName = folder.name;
-            images = folder.images.map(imgData => {
-                const blob = new Blob([imgData], { type: 'image/jpeg' });
-                return new File([blob], imgData.name, { type: 'image/jpeg' });
-            });
-            originalImages = [...images];
-            startViewer();
+        async function loadFromHistory(folder) {
+            try {
+                currentFolderName = folder.name;
+                
+                // Reconstruir los archivos desde los blobs guardados
+                images = await Promise.all(folder.images.map(async (imgData) => {
+                    const blob = new Blob([imgData.data], { type: imgData.type || 'image/jpeg' });
+                    const file = new File([blob], imgData.name, { type: imgData.type || 'image/jpeg' });
+                    return file;
+                }));
+                
+                originalImages = [...images];
+                startViewer();
+            } catch (error) {
+                console.error('Error cargando desde historial:', error);
+                alert('Error al cargar la carpeta. Intenta seleccionarla de nuevo.');
+            }
         }
 
         // Eliminar item del historial
@@ -645,7 +659,7 @@
             if (file) {
                 const url = URL.createObjectURL(file);
                 audioPlayer.src = url;
-                document.getElementById('musicName').textContent = ' ' + file.name.substring(0, 20);
+                document.getElementById('musicName').textContent = '🎵 ' + file.name.substring(0, 20);
                 musicControl.classList.add('visible');
                 audioPlayer.play();
             }
@@ -662,10 +676,14 @@
 
             document.getElementById('fileCount').textContent = `${images.length} fotos cargadas de "${currentFolderName}"`;
             
-            // Guardar en historial
+            // Guardar en historial - Convertir a ArrayBuffer
             const imagesData = await Promise.all(files.map(async file => {
                 const arrayBuffer = await file.arrayBuffer();
-                return { data: arrayBuffer, name: file.name };
+                return { 
+                    data: arrayBuffer, 
+                    name: file.name,
+                    type: file.type 
+                };
             }));
             
             await saveFolderToHistory(currentFolderName, imagesData);
@@ -682,7 +700,7 @@
                 viewer.style.display = 'block';
                 counter.classList.add('visible');
                 folderName.classList.add('visible');
-                folderName.textContent = ' ' + currentFolderName;
+                folderName.textContent = '📁 ' + currentFolderName;
                 createSlides();
                 showSlide(0);
                 startSlideshow();
