@@ -28,6 +28,8 @@
             height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             transition: opacity 0.5s ease;
+            overflow-y: auto;
+            padding: 20px;
         }
 
         .upload-box {
@@ -36,8 +38,9 @@
             padding: 60px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 700px;
+            max-width: 800px;
             width: 90%;
+            margin: 20px 0;
         }
 
         .upload-box h1 {
@@ -77,19 +80,6 @@
             display: none;
         }
 
-        .drop-zone {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 40px;
-            margin: 20px 0;
-            transition: all 0.3s;
-        }
-
-        .drop-zone.dragover {
-            background: rgba(102, 126, 234, 0.1);
-            border-color: #764ba2;
-        }
-
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -124,6 +114,94 @@
         .option-card p {
             color: #666;
             font-size: 0.9em;
+        }
+
+        /* Historial */
+        #historySection {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 90%;
+            margin: 20px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        #historySection.visible {
+            display: block;
+        }
+
+        #historySection h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .history-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .history-item .folder-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .history-item .folder-name {
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+
+        .history-item .folder-date {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .history-item .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #f5576c;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8em;
+            display: none;
+        }
+
+        .history-item:hover .delete-btn {
+            display: block;
+        }
+
+        .no-history {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
         }
 
         /* Visor de fotos */
@@ -205,10 +283,6 @@
             transform: scale(1.1);
         }
 
-        .control-btn.active {
-            background: #667eea;
-        }
-
         .progress-bar {
             flex: 1;
             height: 6px;
@@ -235,17 +309,8 @@
             border-radius: 25px;
         }
 
-        .speed-control label {
-            font-size: 0.9em;
-        }
-
         .speed-control input[type="range"] {
             width: 100px;
-        }
-
-        .info {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.9em;
         }
 
         /* Reproductor de música */
@@ -274,7 +339,7 @@
             cursor: pointer;
         }
 
-        /* Contador */
+        /* Contador y nombre carpeta */
         .counter {
             position: fixed;
             top: 20px;
@@ -290,7 +355,6 @@
             display: block;
         }
 
-        /* Nombre de carpeta */
         .folder-name {
             position: fixed;
             top: 20px;
@@ -309,7 +373,7 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .upload-box {
+            .upload-box, #historySection {
                 padding: 30px 20px;
             }
             
@@ -330,27 +394,11 @@
                 height: 40px;
             }
         }
-
-        /* Animación de carga */
-        .loader {
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla de subida -->
+    <!-- Pantalla de inicio -->
     <div id="uploadScreen">
         <div class="upload-box">
             <h1>📸 PhotoFlow</h1>
@@ -382,6 +430,14 @@
             
             <div id="fileCount" style="margin-top: 20px; color: #666;"></div>
         </div>
+
+        <!-- Sección de Historial -->
+        <div id="historySection">
+            <h2>📚 Historial de Carpetas</h2>
+            <div class="history-list" id="historyList">
+                <div class="no-history">No hay carpetas en el historial</div>
+            </div>
+        </div>
     </div>
 
     <!-- Visor -->
@@ -398,7 +454,7 @@
         
         <div id="controls">
             <div class="controls-wrapper">
-                <button class="control-btn" onclick="previousSlide()" title="Anterior"></button>
+                <button class="control-btn" onclick="previousSlide()" title="Anterior">⏮</button>
                 <button class="control-btn" onclick="togglePlay()" id="playBtn" title="Play/Pause">⏸</button>
                 <button class="control-btn" onclick="nextSlide()" title="Siguiente">⏭</button>
                 
@@ -415,7 +471,7 @@
                 
                 <button class="control-btn" onclick="toggleFullscreen()" title="Pantalla completa">⛶</button>
                 <button class="control-btn" onclick="shuffleSlides()" title="Aleatorio">🔀</button>
-                <button class="control-btn" onclick="resetApp()" title="Nueva presentación">🔄</button>
+                <button class="control-btn" onclick="backToHome()" title="Volver al inicio"></button>
             </div>
         </div>
     </div>
@@ -431,6 +487,7 @@
         let isShuffled = false;
         let originalImages = [];
         let currentFolderName = '';
+        let db;
 
         // Elementos DOM
         const uploadScreen = document.getElementById('uploadScreen');
@@ -447,6 +504,108 @@
         const musicControl = document.getElementById('musicControl');
         const audioPlayer = document.getElementById('audioPlayer');
         const progressFill = document.getElementById('progressFill');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+
+        // Inicializar IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('PhotoFlowDB', 1);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains('folders')) {
+                        database.createObjectStore('folders', { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        // Guardar carpeta en historial
+        async function saveFolderToHistory(folderName, imagesData) {
+            const transaction = db.transaction(['folders'], 'readwrite');
+            const store = transaction.objectStore('folders');
+            
+            const folderData = {
+                name: folderName,
+                date: new Date().toISOString(),
+                images: imagesData
+            };
+            
+            store.add(folderData);
+        }
+
+        // Obtener historial
+        async function getHistory() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['folders'], 'readonly');
+                const store = transaction.objectStore('folders');
+                const request = store.getAll();
+                
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Eliminar del historial
+        async function deleteFromHistory(id) {
+            const transaction = db.transaction(['folders'], 'readwrite');
+            const store = transaction.objectStore('folders');
+            store.delete(id);
+        }
+
+        // Cargar historial al iniciar
+        async function loadHistory() {
+            try {
+                const history = await getHistory();
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="no-history">No hay carpetas en el historial</div>';
+                    return;
+                }
+                
+                historyList.innerHTML = '';
+                history.reverse().forEach(folder => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteHistoryItem(${folder.id})">✕</button>
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-name">${folder.name}</div>
+                        <div class="folder-date">${new Date(folder.date).toLocaleDateString('es-ES')}</div>
+                    `;
+                    item.onclick = () => loadFromHistory(folder);
+                    historyList.appendChild(item);
+                });
+                
+                historySection.classList.add('visible');
+            } catch (error) {
+                console.error('Error cargando historial:', error);
+            }
+        }
+
+        // Cargar desde historial
+        function loadFromHistory(folder) {
+            currentFolderName = folder.name;
+            images = folder.images.map(imgData => {
+                const blob = new Blob([imgData], { type: 'image/jpeg' });
+                return new File([blob], imgData.name, { type: 'image/jpeg' });
+            });
+            originalImages = [...images];
+            startViewer();
+        }
+
+        // Eliminar item del historial
+        async function deleteHistoryItem(id) {
+            await deleteFromHistory(id);
+            loadHistory();
+        }
 
         // Event Listeners
         fileInput.addEventListener('change', handleFiles);
@@ -471,7 +630,6 @@
         function handleFolder(e) {
             const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
             
-            // Obtener nombre de la carpeta
             if (files.length > 0) {
                 const path = files[0].webkitRelativePath;
                 currentFolderName = path.split('/')[0];
@@ -487,13 +645,13 @@
             if (file) {
                 const url = URL.createObjectURL(file);
                 audioPlayer.src = url;
-                document.getElementById('musicName').textContent = '🎵 ' + file.name.substring(0, 20);
+                document.getElementById('musicName').textContent = ' ' + file.name.substring(0, 20);
                 musicControl.classList.add('visible');
                 audioPlayer.play();
             }
         }
 
-        function loadImages(files) {
+        async function loadImages(files) {
             images = files;
             originalImages = [...files];
             
@@ -503,6 +661,14 @@
             }
 
             document.getElementById('fileCount').textContent = `${images.length} fotos cargadas de "${currentFolderName}"`;
+            
+            // Guardar en historial
+            const imagesData = await Promise.all(files.map(async file => {
+                const arrayBuffer = await file.arrayBuffer();
+                return { data: arrayBuffer, name: file.name };
+            }));
+            
+            await saveFolderToHistory(currentFolderName, imagesData);
             
             setTimeout(() => {
                 startViewer();
@@ -516,7 +682,7 @@
                 viewer.style.display = 'block';
                 counter.classList.add('visible');
                 folderName.classList.add('visible');
-                folderName.textContent = '📁 ' + currentFolderName;
+                folderName.textContent = ' ' + currentFolderName;
                 createSlides();
                 showSlide(0);
                 startSlideshow();
@@ -629,9 +795,14 @@
             progressFill.style.width = progress + '%';
         }
 
-        function resetApp() {
+        function backToHome() {
             clearInterval(slideInterval);
-            location.reload();
+            viewer.style.display = 'none';
+            uploadScreen.style.display = 'flex';
+            setTimeout(() => {
+                uploadScreen.style.opacity = '1';
+                loadHistory();
+            }, 100);
         }
 
         // Controles de teclado
@@ -657,6 +828,8 @@
                 case 'Escape':
                     if (document.fullscreenElement) {
                         document.exitFullscreen();
+                    } else {
+                        backToHome();
                     }
                     break;
             }
@@ -672,6 +845,13 @@
                     document.getElementById('controls').classList.remove('visible');
                 }
             }, 3000);
+        });
+
+        // Inicializar
+        initDB().then(() => {
+            loadHistory();
+        }).catch(err => {
+            console.error('Error inicializando DB:', err);
         });
     </script>
 </body>
