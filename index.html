@@ -24,17 +24,15 @@
             touch-action: manipulation;
         }
 
-        /* Pantalla de inicio */
         #uploadScreen {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: opacity 0.5s ease;
-            overflow-y: auto;
             padding: 20px;
+            overflow-y: auto;
         }
 
         .upload-box {
@@ -45,7 +43,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 500px;
             width: 100%;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         .upload-box h1 {
@@ -57,7 +55,6 @@
         .upload-box p {
             color: #666;
             margin-bottom: 30px;
-            font-size: 0.95em;
         }
 
         .upload-btn {
@@ -68,20 +65,14 @@
             border-radius: 50px;
             font-size: 1em;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
             margin: 10px;
-            display: inline-block;
             width: 100%;
             max-width: 300px;
+            transition: transform 0.3s;
         }
 
         .upload-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-        }
-
-        .upload-btn:active {
-            transform: scale(0.95);
         }
 
         .upload-btn.secondary {
@@ -108,7 +99,7 @@
             transition: all 0.3s;
         }
 
-        .option-card:hover, .option-card:active {
+        .option-card:hover {
             background: rgba(102, 126, 234, 0.2);
             transform: translateY(-3px);
         }
@@ -120,8 +111,7 @@
 
         .option-card h3 {
             color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            margin-bottom: 8px;
         }
 
         .option-card p {
@@ -129,20 +119,14 @@
             font-size: 0.85em;
         }
 
-        /* Historial */
         #historySection {
-            display: none;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 30px 20px;
             max-width: 500px;
             width: 100%;
-            margin: 20px 0;
+            margin: 10px 0;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        #historySection.visible {
-            display: block;
         }
 
         #historySection h2 {
@@ -153,7 +137,6 @@
 
         .history-list {
             display: grid;
-            grid-template-columns: 1fr;
             gap: 10px;
             max-height: 300px;
             overflow-y: auto;
@@ -165,15 +148,15 @@
             border-radius: 10px;
             padding: 15px;
             cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
             display: flex;
             align-items: center;
             gap: 15px;
+            transition: all 0.3s;
         }
 
-        .history-item:hover, .history-item:active {
+        .history-item:hover {
             background: rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
         }
 
         .history-item .folder-icon {
@@ -189,13 +172,11 @@
             color: #333;
             font-weight: bold;
             margin-bottom: 5px;
-            word-wrap: break-word;
-            font-size: 0.95em;
         }
 
         .history-item .folder-date {
             color: #666;
-            font-size: 0.75em;
+            font-size: 0.8em;
         }
 
         .history-item .delete-btn {
@@ -206,20 +187,14 @@
             height: 30px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 0.9em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .no-history {
             text-align: center;
             color: #666;
             padding: 30px;
-            font-style: italic;
         }
 
-        /* Visor de fotos */
         #viewer {
             display: none;
             position: relative;
@@ -249,7 +224,6 @@
             object-fit: contain;
         }
 
-        /* Controles */
         #controls {
             position: fixed;
             bottom: 0;
@@ -258,24 +232,18 @@
             background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             padding: 20px 15px 15px;
             display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
         }
 
-        #viewer:hover #controls,
-        #controls.visible {
+        #viewer:hover #controls, #controls.visible {
             display: block;
-            opacity: 1;
         }
 
         .controls-wrapper {
-            max-width: 100%;
-            margin: 0 auto;
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-wrap: wrap;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .control-btn {
@@ -288,12 +256,9 @@
             cursor: pointer;
             font-size: 1.1em;
             transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .control-btn:hover, .control-btn:active {
+        .control-btn:hover {
             background: rgba(255,255,255,0.3);
             transform: scale(1.1);
         }
@@ -323,14 +288,12 @@
             background: rgba(255,255,255,0.1);
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.85em;
         }
 
         .speed-control input[type="range"] {
             width: 80px;
         }
 
-        /* Reproductor de música */
         #musicControl {
             position: fixed;
             top: 15px;
@@ -342,7 +305,6 @@
             align-items: center;
             gap: 10px;
             z-index: 1000;
-            font-size: 0.9em;
         }
 
         #musicControl.visible {
@@ -357,7 +319,6 @@
             cursor: pointer;
         }
 
-        /* Contador */
         .counter {
             position: fixed;
             top: 15px;
@@ -365,107 +326,50 @@
             background: rgba(0,0,0,0.7);
             padding: 12px 18px;
             border-radius: 20px;
-            font-size: 0.85em;
             display: none;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .counter.visible {
             display: flex;
-            flex-direction: column;
-            gap: 5px;
-            align-items: center;
         }
 
         .counter-number {
             font-weight: bold;
             color: #667eea;
-            font-size: 1em;
         }
 
         .counter-folder {
             color: rgba(255,255,255,0.8);
-            font-size: 0.8em;
+            font-size: 0.85em;
             text-align: center;
-            max-width: 200px;
+            max-width: 250px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        /* Responsive para móviles */
         @media (max-width: 768px) {
             .upload-box, #historySection {
                 padding: 30px 20px;
-                margin: 10px;
             }
             
             .upload-box h1 {
                 font-size: 1.6em;
             }
             
-            .upload-box p {
-                font-size: 0.9em;
-            }
-            
-            .option-card {
-                padding: 20px 15px;
-            }
-            
-            .option-card .icon {
-                font-size: 2em;
-            }
-            
-            .controls-wrapper {
-                gap: 8px;
-            }
-            
             .control-btn {
                 width: 40px;
                 height: 40px;
-                font-size: 1em;
-            }
-            
-            .counter {
-                padding: 10px 15px;
-            }
-            
-            .counter-number {
-                font-size: 0.9em;
-            }
-            
-            .counter-folder {
-                font-size: 0.75em;
-                max-width: 150px;
-            }
-        }
-
-        /* Para pantallas muy pequeñas */
-        @media (max-width: 480px) {
-            .upload-box h1 {
-                font-size: 1.4em;
-            }
-            
-            .upload-btn {
-                padding: 12px 25px;
-                font-size: 0.9em;
-            }
-            
-            .control-btn {
-                width: 38px;
-                height: 38px;
-            }
-            
-            .progress-bar {
-                min-width: 80px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla de inicio -->
     <div id="uploadScreen">
         <div class="upload-box">
             <h1>📸 PhotoFlow</h1>
@@ -479,7 +383,7 @@
                 </div>
                 
                 <div class="option-card" onclick="document.getElementById('fileInput').click()">
-                    <div class="icon">️</div>
+                    <div class="icon">🖼️</div>
                     <h3>Cargar Fotos</h3>
                     <p>Selecciona fotos individuales</p>
                 </div>
@@ -495,19 +399,17 @@
                 <input type="file" id="musicInput" accept="audio/*">
             </div>
             
-            <div id="fileCount" style="margin-top: 20px; color: #666; font-size: 0.9em;"></div>
+            <div id="fileCount" style="margin-top: 20px; color: #666;"></div>
         </div>
 
-        <!-- Sección de Historial -->
         <div id="historySection">
-            <h2>📚 Historial</h2>
+            <h2>📚 Historial de Carpetas</h2>
             <div class="history-list" id="historyList">
                 <div class="no-history">No hay carpetas en el historial</div>
             </div>
         </div>
     </div>
 
-    <!-- Visor -->
     <div id="viewer">
         <div id="slidesContainer"></div>
         
@@ -571,7 +473,6 @@
         const musicControl = document.getElementById('musicControl');
         const audioPlayer = document.getElementById('audioPlayer');
         const progressFill = document.getElementById('progressFill');
-        const historySection = document.getElementById('historySection');
         const historyList = document.getElementById('historyList');
 
         function initDB() {
@@ -594,20 +495,14 @@
         }
 
         async function saveFolderToHistory(folderName, imagesData) {
-            try {
-                const transaction = db.transaction(['folders'], 'readwrite');
-                const store = transaction.objectStore('folders');
-                
-                const folderData = {
-                    name: folderName,
-                    date: new Date().toISOString(),
-                    images: imagesData
-                };
-                
-                store.add(folderData);
-            } catch (error) {
-                console.error('Error guardando:', error);
-            }
+            const transaction = db.transaction(['folders'], 'readwrite');
+            const store = transaction.objectStore('folders');
+            
+            store.add({
+                name: folderName,
+                date: new Date().toISOString(),
+                images: imagesData
+            });
         }
 
         function getHistory() {
@@ -628,140 +523,101 @@
         }
 
         async function loadHistory() {
-            try {
-                const history = await getHistory();
-                
-                if (history.length === 0) {
-                    historyList.innerHTML = '<div class="no-history">No hay carpetas en el historial</div>';
-                    return;
-                }
-                
-                historyList.innerHTML = '';
-                history.reverse().forEach(folder => {
-                    const item = document.createElement('div');
-                    item.className = 'history-item';
-                    item.innerHTML = `
-                        <div class="folder-icon">📁</div>
-                        <div class="folder-info">
-                            <div class="folder-name">${folder.name}</div>
-                            <div class="folder-date">${new Date(folder.date).toLocaleDateString('es-ES')}</div>
-                        </div>
-                        <button class="delete-btn" onclick="event.stopPropagation(); deleteHistoryItem(${folder.id})">✕</button>
-                    `;
-                    item.onclick = () => loadFromHistory(folder);
-                    historyList.appendChild(item);
-                });
-                
-                historySection.classList.add('visible');
-            } catch (error) {
-                console.error('Error cargando historial:', error);
+            const history = await getHistory();
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="no-history">No hay carpetas en el historial</div>';
+                return;
             }
+            
+            historyList.innerHTML = '';
+            history.reverse().forEach(folder => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div class="folder-icon">📁</div>
+                    <div class="folder-info">
+                        <div class="folder-name">${folder.name}</div>
+                        <div class="folder-date">${new Date(folder.date).toLocaleDateString('es-ES')}</div>
+                    </div>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteHistoryItem(${folder.id})">✕</button>
+                `;
+                item.onclick = () => loadFromHistory(folder);
+                historyList.appendChild(item);
+            });
         }
 
         async function loadFromHistory(folder) {
-            try {
-                currentFolderName = folder.name;
-                
-                images = await Promise.all(folder.images.map(async (imgData) => {
-                    const blob = new Blob([imgData.data], { type: imgData.type || 'image/jpeg' });
-                    const file = new File([blob], imgData.name, { type: imgData.type || 'image/jpeg' });
-                    return file;
-                }));
-                
-                originalImages = [...images];
-                startViewer();
-            } catch (error) {
-                console.error('Error cargando:', error);
-                alert('Error al cargar. Intenta de nuevo.');
-            }
+            currentFolderName = folder.name;
+            
+            images = await Promise.all(folder.images.map(async (imgData) => {
+                const blob = new Blob([imgData.data], { type: imgData.type || 'image/jpeg' });
+                return new File([blob], imgData.name, { type: imgData.type || 'image/jpeg' });
+            }));
+            
+            originalImages = [...images];
+            startViewer();
         }
 
         async function deleteHistoryItem(id) {
-            await deleteFromHistory(id);
+            deleteFromHistory(id);
             loadHistory();
         }
 
-        fileInput.addEventListener('change', handleFiles);
-        folderInput.addEventListener('change', handleFolder);
-        musicInput.addEventListener('change', handleMusic);
-        
-        speedRange.addEventListener('input', (e) => {
-            slideDuration = (11 - e.target.value) * 1000;
-            speedValue.textContent = e.target.value + 's';
-            if (isPlaying) {
-                clearInterval(slideInterval);
-                slideInterval = setInterval(nextSlide, slideDuration);
-            }
-        });
-
-        function handleFiles(e) {
-            const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
             currentFolderName = 'Fotos seleccionadas';
             loadImages(files);
-        }
+        });
 
-        function handleFolder(e) {
-            const files = Array.from(e.target.files).filter(file => file.type.startsWith('image/'));
-            
+        folderInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
             if (files.length > 0) {
                 const path = files[0].webkitRelativePath;
                 currentFolderName = path.split('/')[0];
-            } else {
-                currentFolderName = 'Carpeta';
             }
-            
             loadImages(files);
-        }
+        });
 
-        function handleMusic(e) {
+        musicInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                const url = URL.createObjectURL(file);
-                audioPlayer.src = url;
+                audioPlayer.src = URL.createObjectURL(file);
                 document.getElementById('musicName').textContent = '🎵 ' + file.name.substring(0, 15);
                 musicControl.classList.add('visible');
                 audioPlayer.play();
             }
-        }
+        });
 
         async function loadImages(files) {
-            images = files;
-            originalImages = [...files];
-            
-            if (images.length === 0) {
+            if (files.length === 0) {
                 alert('No se encontraron imágenes');
                 return;
             }
 
-            document.getElementById('fileCount').textContent = `${images.length} fotos`;
+            images = files;
+            originalImages = [...files];
             
-            const imagesData = await Promise.all(files.map(async file => {
-                const arrayBuffer = await file.arrayBuffer();
-                return { 
-                    data: arrayBuffer, 
-                    name: file.name,
-                    type: file.type 
-                };
-            }));
+            document.getElementById('fileCount').textContent = `${files.length} fotos cargadas`;
+            
+            const imagesData = await Promise.all(files.map(async file => ({
+                data: await file.arrayBuffer(),
+                name: file.name,
+                type: file.type
+            })));
             
             await saveFolderToHistory(currentFolderName, imagesData);
-            
-            setTimeout(() => {
-                startViewer();
-            }, 500);
+            setTimeout(startViewer, 500);
         }
 
         function startViewer() {
-            uploadScreen.style.opacity = '0';
-            setTimeout(() => {
-                uploadScreen.style.display = 'none';
-                viewer.style.display = 'block';
-                counter.classList.add('visible');
-                updateCounterDisplay();
-                createSlides();
-                showSlide(0);
-                startSlideshow();
-            }, 500);
+            uploadScreen.style.display = 'none';
+            viewer.style.display = 'block';
+            counter.classList.add('visible');
+            updateCounterDisplay();
+            createSlides();
+            showSlide(0);
+            startSlideshow();
         }
 
         function createSlides() {
@@ -769,13 +625,7 @@
             images.forEach((image, index) => {
                 const slide = document.createElement('div');
                 slide.className = 'slide';
-                slide.dataset.index = index;
-                
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(image);
-                img.alt = image.name;
-                
-                slide.appendChild(img);
+                slide.innerHTML = `<img src="${URL.createObjectURL(image)}" alt="${image.name}">`;
                 slidesContainer.appendChild(slide);
             });
         }
@@ -783,36 +633,24 @@
         function showSlide(index) {
             const slides = document.querySelectorAll('.slide');
             slides.forEach((slide, i) => {
-                slide.classList.remove('active');
-                if (i === index) {
-                    slide.classList.add('active');
-                }
+                slide.classList.toggle('active', i === index);
             });
-            
             currentIndex = index;
             updateCounterDisplay();
             updateProgress();
         }
 
         function nextSlide() {
-            let nextIndex = currentIndex + 1;
-            if (nextIndex >= images.length) {
-                nextIndex = 0;
-            }
-            showSlide(nextIndex);
+            showSlide((currentIndex + 1) % images.length);
         }
 
         function previousSlide() {
-            let prevIndex = currentIndex - 1;
-            if (prevIndex < 0) {
-                prevIndex = images.length - 1;
-            }
-            showSlide(prevIndex);
+            showSlide((currentIndex - 1 + images.length) % images.length);
         }
 
         function startSlideshow() {
             isPlaying = true;
-            playBtn.textContent = '';
+            playBtn.textContent = '⏸';
             slideInterval = setInterval(nextSlide, slideDuration);
         }
 
@@ -861,13 +699,11 @@
         function seekTo(event) {
             const bar = event.currentTarget;
             const clickPosition = event.offsetX / bar.offsetWidth;
-            const newIndex = Math.floor(clickPosition * images.length);
-            showSlide(newIndex);
+            showSlide(Math.floor(clickPosition * images.length));
         }
 
         function updateProgress() {
-            const progress = ((currentIndex + 1) / images.length) * 100;
-            progressFill.style.width = progress + '%';
+            progressFill.style.width = `${((currentIndex + 1) / images.length) * 100}%`;
         }
 
         function updateCounterDisplay() {
@@ -881,32 +717,19 @@
             clearInterval(slideInterval);
             viewer.style.display = 'none';
             uploadScreen.style.display = 'flex';
-            setTimeout(() => {
-                uploadScreen.style.opacity = '1';
-                loadHistory();
-            }, 100);
+            loadHistory();
         }
 
         document.addEventListener('keydown', (e) => {
             if (viewer.style.display === 'none') return;
             
             switch(e.key) {
-                case 'ArrowRight':
-                    nextSlide();
-                    break;
-                case 'ArrowLeft':
-                    previousSlide();
-                    break;
-                case ' ':
-                    togglePlay();
-                    break;
-                case 'f':
-                    toggleFullscreen();
-                    break;
-                case 'm':
-                    toggleMusic();
-                    break;
-                case 'Escape':
+                case 'ArrowRight': nextSlide(); break;
+                case 'ArrowLeft': previousSlide(); break;
+                case ' ': togglePlay(); break;
+                case 'f': toggleFullscreen(); break;
+                case 'm': toggleMusic(); break;
+                case 'Escape': 
                     if (document.fullscreenElement) {
                         document.exitFullscreen();
                     } else {
@@ -916,7 +739,6 @@
             }
         });
 
-        // Soporte para gestos táctiles (swipe)
         let touchStartX = 0;
         let touchEndX = 0;
 
@@ -926,9 +748,31 @@
 
         viewer.addEventListener('touchend', (e) => {
             touchEndX = e.changedTouches[0].screenX;
-            handleSwipe();
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                diff > 0 ? nextSlide() : previousSlide();
+            }
         });
 
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            const diff =
+        let controlsTimeout;
+        viewer.addEventListener('mousemove', () => {
+            document.getElementById('controls').classList.add('visible');
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(() => {
+                if (isPlaying) document.getElementById('controls').classList.remove('visible');
+            }, 3000);
+        });
+
+        speedRange.addEventListener('input', (e) => {
+            slideDuration = (11 - e.target.value) * 1000;
+            speedValue.textContent = e.target.value + 's';
+            if (isPlaying) {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, slideDuration);
+            }
+        });
+
+        initDB().then(loadHistory).catch(console.error);
+    </script>
+</body>
+</html>
