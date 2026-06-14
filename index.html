@@ -16,9 +16,9 @@
             --primary: #667eea;
             --secondary: #764ba2;
             --bg-dark: #1a1a2e;
-   --bg-card: rgba(30, 30, 50, 0.95);
+            --bg-card: rgba(30, 30, 50, 0.95);
             --text-primary: #ffffff;
---text-secondary: #aaaaaa;
+            --text-secondary: #aaaaaa;
             --border-radius: 20px;
         }
 
@@ -643,16 +643,28 @@
                 }
             };
 
-            progressBar.addEventListener('click', (e) => processSeek(e.clientX));
+            // PC - Click
+            progressBar.addEventListener('click', (e) => {
+                e.preventDefault();
+                processSeek(e.clientX);
+            });
 
+            // Móvil - Touch (con preventDefault)
             progressBar.addEventListener('touchstart', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 processSeek(e.touches[0].clientX);
             }, {passive: false});
 
             progressBar.addEventListener('touchmove', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 processSeek(e.touches[0].clientX);
+            }, {passive: false});
+            
+            // Añadir touchend para mejor compatibilidad
+            progressBar.addEventListener('touchend', (e) => {
+                e.preventDefault();
             }, {passive: false});
         }
 
