@@ -1,7 +1,7 @@
 {
   "name": "PhotoFlow Pro - Visor de Fotos y Vídeos",
   "short_name": "PhotoFlow Pro",
-  "description": "Tu galería personal con álbumes, temas y soporte para vídeos",
+  "description": "Tu galería personal con álbumes, música y soporte para vídeos",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#1a1a2e",

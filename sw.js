@@ -6,7 +6,6 @@ const urlsToCache = [
   './icon-512.png'
 ];
 
-// Instalar Service Worker
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -20,7 +19,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activar y limpiar caches antiguos
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -36,7 +34,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Interceptar peticiones
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)

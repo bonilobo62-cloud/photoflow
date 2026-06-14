@@ -18,43 +18,11 @@
             --bg-dark: #1a1a2e;
             --bg-card: rgba(255, 255, 255, 0.95);
             --text-primary: #ffffff;
-            --text-secondary: #666666;
+            --text-secondary: #aaaaaa;
             --border-radius: 20px;
         }
 
-        [data-theme="dark"] {
-            --bg-dark: #0f0f1e;
-            --bg-card: rgba(30, 30, 50, 0.95);
-            --text-primary: #ffffff;
-            --text-secondary: #aaaaaa;
-        }
-
-        [data-theme="light"] {
-            --bg-dark: #f0f2f5;
-            --bg-card: rgba(255, 255, 255, 0.98);
-            --text-primary: #1a1a2e;
-            --text-secondary: #666666;
-        }
-
-        [data-theme="purple"] {
-            --primary: #a855f7;
-            --secondary: #ec4899;
-            --bg-dark: #2e1065;
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --text-primary: #ffffff;
-            --text-secondary: #d8b4fe;
-        }
-
-        [data-theme="blue"] {
-            --primary: #0ea5e9;
-            --secondary: #06b6d4;
-            --bg-dark: #0c4a6e;
-            --bg-card: rgba(255, 255, 255, 0.95);
-            --text-primary: #ffffff;
-            --text-secondary: #7dd3fc;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
@@ -77,31 +45,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 5px;
-        }
-
-        .top-controls {
-            display: flex;
-            gap: 10px;
-            padding: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            background: var(--bg-card);
-            border: 2px solid var(--primary);
-            color: var(--text-primary);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .control-btn:hover, .control-btn.active {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
         }
 
         .search-container {
@@ -259,7 +202,7 @@
             transition: opacity 0.3s;
         }
 
-        #viewer:hover #viewer-controls { opacity: 1; }
+        #viewer:hover #viewer-controls, #viewer:active #viewer-controls { opacity: 1; }
 
         .viewer-controls-row {
             display: flex;
@@ -290,13 +233,14 @@
         .progress-bar {
             width: 100%;
             max-width: 400px;
-            height: 6px;
+            height: 8px;
             background: rgba(255,255,255,0.3);
-            border-radius: 3px;
+            border-radius: 4px;
             cursor: pointer;
             touch-action: none;
             -webkit-touch-callout: none;
             user-select: none;
+            position: relative;
         }
 
         .progress-fill {
@@ -305,6 +249,24 @@
             border-radius: 3px;
             width: 0%;
             transition: width 0.2s;
+        }
+
+        .progress-thumb {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            pointer-events: none;
+            left: 0%;
+        }
+
+        @media (max-width: 768px) {
+            .progress-bar { height: 12px; }
+            .progress-thumb { width: 20px; height: 20px; }
         }
 
         .info-overlay {
@@ -378,22 +340,15 @@
         .hidden { display: none !important; }
     </style>
 </head>
-<body data-theme="dark">
+<body>
 
     <div class="header">
         <h1>📸 PhotoFlow Pro</h1>
         <p style="color: var(--text-secondary);">Tu galería personal con álbumes</p>
     </div>
 
-    <div class="top-controls">
-        <button class="control-btn active" onclick="setTheme('dark')">🌙 Oscuro</button>
-        <button class="control-btn" onclick="setTheme('light')">☀️ Claro</button>
-        <button class="control-btn" onclick="setTheme('purple')">💜 Purple</button>
-        <button class="control-btn" onclick="setTheme('blue')">💙 Blue</button>
-    </div>
-
     <div class="search-container">
-        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Buscar fotos o álbumes..." oninput="searchItems()">
+        <input type="text" class="search-box" id="searchBox" placeholder=" Buscar álbumes..." oninput="searchItems()">
     </div>
 
     <div class="section" id="mainContent">
@@ -405,6 +360,12 @@
             <input type="file" id="folderInput" webkitdirectory directory multiple>
             <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">🖼️ Seleccionar Fotos/Vídeos</button>
             <input type="file" id="fileInput" multiple accept="image/*,video/*">
+            
+            <h3 style="margin-top: 20px; margin-bottom: 10px; color: var(--primary);">🎵 Música de fondo (opcional)</h3>
+            <button class="btn btn-outline" onclick="document.getElementById('musicInput').click()">🎵 Seleccionar Música</button>
+            <input type="file" id="musicInput" accept="audio/*">
+            <div id="musicStatus" style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;"></div>
+            
             <div id="loader" class="loader"></div>
         </div>
 
@@ -424,11 +385,12 @@
                 <button class="viewer-btn" onclick="prevSlide()">⏮</button>
                 <button class="viewer-btn" id="playPauseBtn" onclick="togglePlay()">⏸</button>
                 <button class="viewer-btn" onclick="nextSlide()">⏭</button>
-                <button class="viewer-btn" onclick="toggleMusic()">🎵</button>
+                <button class="viewer-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
                 <button class="viewer-btn" onclick="goHome()">🏠</button>
             </div>
             <div class="progress-bar" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
+                <div class="progress-thumb" id="progressThumb"></div>
             </div>
         </div>
         
@@ -453,16 +415,17 @@
         let db = null;
         let albums = [];
         let currentAlbum = null;
+        let musicLoaded = false;
 
         window.onload = async function() {
             await initDB();
-            loadTheme();
             await loadAlbums();
             registerServiceWorker();
             setupProgressBar();
             
             document.getElementById('folderInput').addEventListener('change', (e) => handleFiles(e, 'folder'));
             document.getElementById('fileInput').addEventListener('change', (e) => handleFiles(e, 'files'));
+            document.getElementById('musicInput').addEventListener('change', handleMusic);
         };
 
         function registerServiceWorker() {
@@ -589,23 +552,6 @@
             await loadAlbums();
         }
 
-        function setTheme(themeName) {
-            document.body.setAttribute('data-theme', themeName);
-            localStorage.setItem('photoflow-theme', themeName);
-            
-            document.querySelectorAll('.control-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.textContent.toLowerCase().includes(themeName)) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-
-        function loadTheme() {
-            const saved = localStorage.getItem('photoflow-theme') || 'dark';
-            setTheme(saved);
-        }
-
         function searchItems() {
             const query = document.getElementById('searchBox').value.toLowerCase();
             if(!query) {
@@ -638,6 +584,16 @@
             });
         }
 
+        function handleMusic(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const audioPlayer = document.getElementById('audioPlayer');
+                audioPlayer.src = URL.createObjectURL(file);
+                musicLoaded = true;
+                document.getElementById('musicStatus').textContent = '✅ Música cargada: ' + file.name;
+            }
+        }
+
         async function handleFiles(e, type) {
             const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
             if(files.length === 0) return;
@@ -651,7 +607,7 @@
             if(albums.length > 0) {
                 const addToExisting = confirm(`¿Quieres añadir estas ${files.length} fotos a un álbum existente?\n\nCancelar para crear slideshow temporal`);
                 if(addToExisting) {
-                    const albumName = prompt('Escribe el nombre del álbum (o deja vacío para ver la lista):');
+                    const albumName = prompt('Escribe el nombre del álbum:');
                     if(albumName) {
                         const album = albums.find(a => a.name.toLowerCase() === albumName.toLowerCase());
                         if(album) {
@@ -671,34 +627,33 @@
 
         function setupProgressBar() {
             const progressBar = document.getElementById('progressBar');
-            
-            if(progressBar) {
-                // PC - Click
-                progressBar.addEventListener('click', handleSeek);
-                
-                // Móvil - Touch
-                progressBar.addEventListener('touchstart', handleSeek, {passive: false});
-                progressBar.addEventListener('touchmove', handleSeek, {passive: false});
-            }
-        }
+            if(!progressBar) return;
 
-        function handleSeek(e) {
-            e.preventDefault();
-            
-            const bar = document.getElementById('progressBar');
-            const rect = bar.getBoundingClientRect();
-            
-            let clientX = e.clientX;
-            if(e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-            }
-            
-            const clickPosition = (clientX - rect.left) / rect.width;
-            const targetIndex = Math.floor(clickPosition * images.length);
-            
-            if(targetIndex >= 0 && targetIndex < images.length) {
-                showSlide(targetIndex);
-            }
+            const processSeek = (clientX) => {
+                const rect = progressBar.getBoundingClientRect();
+                let pos = (clientX - rect.left) / rect.width;
+                pos = Math.max(0, Math.min(1, pos));
+                const targetIndex = Math.floor(pos * images.length);
+                
+                const thumb = document.getElementById('progressThumb');
+                if(thumb) thumb.style.left = (pos * 100) + '%';
+
+                if(targetIndex !== currentIndex && targetIndex >= 0 && targetIndex < images.length) {
+                    showSlide(targetIndex);
+                }
+            };
+
+            progressBar.addEventListener('click', (e) => processSeek(e.clientX));
+
+            progressBar.addEventListener('touchstart', (e) => {
+                e.stopPropagation();
+                processSeek(e.touches[0].clientX);
+            }, {passive: false});
+
+            progressBar.addEventListener('touchmove', (e) => {
+                e.stopPropagation();
+                processSeek(e.touches[0].clientX);
+            }, {passive: false});
         }
 
         function startSlideshow(fileList, title) {
@@ -748,7 +703,6 @@
             document.getElementById('viewerInfo').textContent = `${title} | ${images.length} archivos`;
             document.getElementById('mainContent').style.display = 'none';
             document.querySelector('.header').style.display = 'none';
-            document.querySelector('.top-controls').style.display = 'none';
             document.querySelector('.search-container').style.display = 'none';
             document.getElementById('viewer').style.display = 'block';
             
@@ -816,18 +770,28 @@
 
         function toggleMusic() {
             const audio = document.getElementById('audioPlayer');
-            if(audio.src) {
-                if(audio.paused) { audio.play(); }
-                else { audio.pause(); }
+            if(musicLoaded) {
+                if(audio.paused) { 
+                    audio.play(); 
+                    document.getElementById('musicBtn').style.background = 'rgba(102, 126, 234, 0.6)';
+                } else { 
+                    audio.pause(); 
+                    document.getElementById('musicBtn').style.background = 'rgba(255,255,255,0.2)';
+                }
+            } else {
+                alert('Primero selecciona música en la pantalla principal');
             }
         }
 
         function goHome() {
             pause();
+            const audio = document.getElementById('audioPlayer');
+            audio.pause();
+            document.getElementById('musicBtn').style.background = 'rgba(255,255,255,0.2)';
+            
             document.getElementById('viewer').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
             document.querySelector('.header').style.display = 'block';
-            document.querySelector('.top-controls').style.display = 'flex';
             document.querySelector('.search-container').style.display = 'block';
             loadAlbums();
         }
@@ -835,6 +799,9 @@
         function updateProgress() {
             const percent = ((currentIndex + 1) / images.length) * 100;
             document.getElementById('progressFill').style.width = percent + '%';
+            
+            const thumb = document.getElementById('progressThumb');
+            if(thumb) thumb.style.left = percent + '%';
         }
 
         let touchStartX = 0;
